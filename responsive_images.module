@@ -1,0 +1,111 @@
+<?php
+
+function responsive_images_theme_registry_alter(&$theme_registry) {
+  foreach ($theme_registry as $key => $info) {
+    if ($key == 'image_style') {
+      $theme_registry[$key]['function'] = 'responsive_images_image_style';
+    }
+  }
+}
+function responsive_images_get_responsive_styles(){
+
+  $responsive_styles = array(
+    'triggers' => array(),
+    'groups' => array()
+  );
+
+  foreach(image_styles() as $key => $style){
+
+    if( preg_match("/(rs_[a-z-\\s]+)(_min_)?([0-9px]+)?/u", $style['label'], $matches) !== 0) {
+
+      $rstyle = array();
+      $style_group = $matches[1];
+
+      //check to see if style_group exists
+      if(!isset($responsive_styles['groups'][$style_group])){
+        $responsive_styles['groups'][$style_group] = array();
+      }
+
+      if(isset($matches[2]) && $matches[2] == '_min_' && isset($matches[3]) && strlen($matches[3]) > 0){
+        //group
+        $rstyle = array(
+          'float' => floatval($matches[3]),
+          'min' => $matches[3],
+          'machine_value' => $style['name']
+        );
+        //add
+        $responsive_styles['groups'][$style_group][] = $rstyle;
+
+      } else {
+        //tigger style
+        $responsive_styles['triggers'][] = $style_group;
+      }
+    }
+  }
+
+  //make triggers unique
+  $responsive_styles['triggers'] = array_unique($responsive_styles['triggers']);
+
+  //sort groups by min
+  foreach($responsive_styles['groups'] as $key => $group){
+    $sort = array();
+    foreach($group as $item){
+      $sort[] = $item['float'];
+    }
+
+    array_multisort( $sort, SORT_ASC, $responsive_styles['groups'][$key] );
+  }
+
+  return $responsive_styles;
+
+}
+
+function responsive_images_get_responsive_group(&$styles, $style_name){
+
+  if(($key=array_search($style_name,$styles['triggers'])) !== false){
+    return $styles['triggers'][$key];
+  }
+
+  return false;
+}
+
+function responsive_images_image_style(&$variables) {
+  $styles = responsive_images_get_responsive_styles();
+
+  if( ($rs_group = responsive_images_get_responsive_group($styles, $variables['style_name']) ) !== false ){
+    $variables['rs_group'] = $styles['groups'][$rs_group];
+    return responsive_images_image_render($variables);
+  }
+
+  // Determine the dimensions of the styled image.
+  $dimensions = array(
+    'width' => $variables['width'],
+    'height' => $variables['height'],
+  );
+  // Determine the URL for the styled image.
+  $variables['path'] = image_style_url($variables['style_name'], $variables['path']);
+  return theme('image', $variables);
+}
+function responsive_images_image_render($image){
+
+  if(!isset($image['rs_group'])){
+    $styles = responsive_images_get_responsive_styles();
+    $rs_group = responsive_images_get_responsive_group($styles, $image['style_name']);
+    if($rs_group === false){
+      return 'Could not find responsive group style. Error.';
+    }
+    $image['rs_group'] = $styles['groups'][$rs_group];
+  }
+
+  drupal_add_js(drupal_get_path('module', 'responsive_images').'/responsive-image.min.js');
+
+  $output = '<div class="responsive-image '.$image['style_name'].'">'."\n";
+  foreach($image['rs_group'] as $group){
+    $output .= "\t".'<div data-src="'.image_style_url($group['machine_value'],$image['path']).'" data-min="'.$group['min'].'"></div>'."\n";
+  }
+
+  $output .= "\t".'<img src="'.image_style_url($image['rs_group'][0]['machine_value'], $image['path']).'" alt="'.((isset($image['title'])) ? $image['title'] : '').'" width="100%" height="100%" />'."\n";
+  $output .= "</div>\n";
+
+  return $output;
+}

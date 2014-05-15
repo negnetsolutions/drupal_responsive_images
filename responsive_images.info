@@ -1,0 +1,5 @@
+name = Responsive Images
+description = Make any image responsive.
+core = 7.x
+package = Media
+dependencies[] = image
