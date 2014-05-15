@@ -1,4 +1,6 @@
-drupal_responsive_images
+responsive_images
 ========================
 
-Responsive Image Load Module for Drupal7
+Responsive Image Loader Module for Drupal7
+
+More to come in the future
