@@ -100,11 +100,15 @@ function responsive_images_image_render($image){
   drupal_add_js(drupal_get_path('module', 'responsive_images').'/responsive-image.min.js');
 
   $output = '<div class="responsive-image '.$image['style_name'].'">'."\n";
-  foreach($image['rs_group'] as $group){
-    $output .= "\t".'<div data-src="'.image_style_url($group['machine_value'],$image['path']).'" data-min="'.$group['min'].'"></div>'."\n";
-  }
 
-  $output .= "\t".'<img src="'.image_style_url($image['rs_group'][0]['machine_value'], $image['path']).'" alt="'.((isset($image['title'])) ? $image['title'] : '').'" width="100%" />'."\n";
+  $srcset="";
+  foreach($image['rs_group'] as $group){
+    $srcset .= image_style_url($group['machine_value'],$image['path']).' '.str_replace('px','w',$group['min']).',';
+  }
+  $srcset = substr($srcset,0,-1);
+
+  $output .= '<img srcset="'.$srcset.'" src="'.image_style_url($image['rs_group'][0]['machine_value'], $image['path']).'" alt="'.((isset($image['title'])) ? $image['title'] : '').'" width="100%" />'."\n";
+
   $output .= "</div>\n";
 
   return $output;
