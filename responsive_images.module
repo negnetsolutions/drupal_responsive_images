@@ -103,7 +103,9 @@ function responsive_images_image_render($image){
 
   $srcset="";
   foreach($image['rs_group'] as $group){
-    $srcset .= image_style_url($group['machine_value'],$image['path']).' '.str_replace('px','w',$group['min']).',';
+    $dimensions = array('width'=>$image['width'],'height'=>$image['height']);
+    image_style_transform_dimensions($group['machine_value'], $dimensions);
+    $srcset .= image_style_url($group['machine_value'],$image['path']).' '.$dimensions['width'].'w,';
   }
   $srcset = substr($srcset,0,-1);
 
