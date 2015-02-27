@@ -103,7 +103,13 @@ function responsive_images_image_render($image){
 
   $srcset="";
   foreach($image['rs_group'] as $group){
-    $dimensions = array('width'=>$image['width'],'height'=>$image['height']);
+    if(!isset($image['width'])){
+      $i = image_load($image['path']);
+      $dimensions = array('width'=>$i->info['width'],'height'=>$i->info['height']);
+    } else {
+      $dimensions = array('width'=>$image['width'],'height'=>$image['height']);
+    }
+
     image_style_transform_dimensions($group['machine_value'], $dimensions);
     $srcset .= image_style_url($group['machine_value'],$image['path']).' '.$dimensions['width'].'w,';
   }
