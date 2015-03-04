@@ -158,7 +158,7 @@ function responsive_images_image_render($image){
 
   drupal_add_js(drupal_get_path('module', 'responsive_images').'/responsive-image.min.js');
 
-  $output = '<div class="responsive-image '.$image['style_name'].((isset($image['classes'])) ? ' '.$image['classes'] : '').'">'."\n";
+  $output = '<div class="responsive-image '.$image['style_name'].'">'."\n";
 
   $srcset="";
   foreach($image['rs_group'] as $group){
@@ -174,7 +174,7 @@ function responsive_images_image_render($image){
   }
   $srcset = substr($srcset,0,-1);
 
-  $output .= '<img srcset="'.$srcset.'" src="'.image_style_url($image['rs_group'][0]['machine_value'], $image['path']).'" alt="'.((isset($image['title'])) ? $image['title'] : '').'" width="100%" />'."\n";
+  $output .= '<img srcset="'.$srcset.'" src="'.image_style_url($image['rs_group'][0]['machine_value'], $image['path']).'" alt="'.((isset($image['title'])) ? $image['title'] : '').'" width="100%"'.((isset($image['classes'])) ? 'class="'.$image['classes'].'"' : '').' />'."\n";
 
   $output .= "</div>\n";
 
