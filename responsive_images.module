@@ -1,5 +1,64 @@
 <?php
 
+function responsive_images_filter_info() {
+  $filters = array();
+  $filters['responsive_image_filter'] = array(
+    'title' => t('Responsive Image Filter'),
+    'description' => t('Substitutes [image:URL|,class_name] with responsive image.'),
+    'process callback' => '_responsive_images_filter_process',
+    'settings callback' => '_responsive_images_filter_settings',
+    'default settings' => array(
+      'responsive_image_filter_image-style' => false,
+    ),
+    'weight' => -1,
+  );
+  return $filters;
+}
+function _responsive_images_filter_settings($form, &$form_state, $filter, $format, $defaults, $filters) {
+
+  $styles = array();
+  foreach( image_styles() as $style ){
+    $styles[$style['name']] = $style['name'];
+  }
+
+
+  $settings['responsive_image_filter_image-style'] = array(
+    '#type' => 'select',
+    '#title' => t('Image Style'),
+    '#default_value' => $filter->settings['responsive_image_filter_image-style'],
+    '#options' => $styles,
+  );
+
+  return $settings;
+}
+function _responsive_images_filter_process($text, $filter, $format, $langcode, $cache, $cache_id) {
+
+  $uri = 'public://';
+  $public_path= str_replace($GLOBALS['base_url'], '', file_create_url($uri));
+
+  if (preg_match_all("/\\[image:\\s*([^,]+)(,(.+))?\\]/isU", $text, $matches_code)) {
+
+    foreach($matches_code[0] as $ci => $code){
+
+      $styled_uri = substr(strrchr($matches_code[1][$ci],'/'), 1);
+      $uri = "public://".str_replace(strstr($styled_uri,'?'),'',$styled_uri);
+
+      $image = array(
+        'uri' => $uri,
+        'path' => $uri,
+        'style_name' => $filter->settings['responsive_image_filter_image-style'],
+        'classes' => (isset($matches_code[3][$ci])) ? $matches_code[3][$ci] : null
+      );
+
+      $replacement = responsive_images_image_render($image);
+      $text = str_replace($code, $replacement, $text);
+    }
+  }
+
+  return $text;
+}
+
+
 function responsive_images_theme_registry_alter(&$theme_registry) {
   foreach ($theme_registry as $key => $info) {
     if ($key == 'image_style') {
@@ -99,7 +158,7 @@ function responsive_images_image_render($image){
 
   drupal_add_js(drupal_get_path('module', 'responsive_images').'/responsive-image.min.js');
 
-  $output = '<div class="responsive-image '.$image['style_name'].'">'."\n";
+  $output = '<div class="responsive-image '.$image['style_name'].((isset($image['classes'])) ? ' '.$image['classes'] : '').'">'."\n";
 
   $srcset="";
   foreach($image['rs_group'] as $group){
