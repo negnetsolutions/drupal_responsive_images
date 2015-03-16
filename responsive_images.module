@@ -25,7 +25,7 @@ function _responsive_images_filter_settings($form, &$form_state, $filter, $forma
   $settings['responsive_image_filter_image-style'] = array(
     '#type' => 'select',
     '#title' => t('Image Style'),
-    '#default_value' => $filter->settings['responsive_image_filter_image-style'],
+    '#default_value' => isset($filter->settings['responsive_image_filter_image-style']) ? $filter->settings['responsive_image_filter_image-style'] : false,
     '#options' => $styles,
   );
 
