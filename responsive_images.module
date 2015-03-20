@@ -178,5 +178,7 @@ function responsive_images_image_render($image){
 
   $output .= "</div>\n";
 
+  $output = str_replace($GLOBALS['base_url'],'',$output);
+
   return $output;
 }
