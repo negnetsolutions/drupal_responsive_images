@@ -75,7 +75,7 @@ function responsive_images_get_responsive_styles(){
 
   foreach(image_styles() as $key => $style){
 
-    if( preg_match("/(rs_[a-z-\\s]+)(_min_)?([0-9px]+)?/u", $style['label'], $matches) !== 0) {
+    if( preg_match("/(rs_[a-z-\\s]+)_?(min_)?([0-9pxw]+)?/u", $style['label'], $matches) !== 0) {
 
       $rstyle = array();
       $style_group = $matches[1];
@@ -85,11 +85,12 @@ function responsive_images_get_responsive_styles(){
         $responsive_styles['groups'][$style_group] = array();
       }
 
-      if(isset($matches[2]) && $matches[2] == '_min_' && isset($matches[3]) && strlen($matches[3]) > 0){
+      if(isset($matches[3]) && strlen($matches[3]) > 0){
+
         //group
         $rstyle = array(
           'float' => floatval($matches[3]),
-          'min' => $matches[3],
+          'width' => (strstr($matches[3],"w") !== false) ? $matches[3] : false,
           'machine_value' => $style['name']
         );
         //add
@@ -162,15 +163,18 @@ function responsive_images_image_render($image){
 
   $srcset="";
   foreach($image['rs_group'] as $group){
-    if(!isset($image['width'])){
-      $i = image_load($image['path']);
-      $dimensions = array('width'=>$i->info['width'],'height'=>$i->info['height']);
-    } else {
-      $dimensions = array('width'=>$image['width'],'height'=>$image['height']);
-    }
+    if( $group['width'] == false ){
+      if(!isset($image['width'])){
+        $i = image_load($image['path']);
+        $dimensions = array('width'=>$i->info['width'],'height'=>$i->info['height']);
+      } else {
+        $dimensions = array('width'=>$image['width'],'height'=>$image['height']);
+      }
+      image_style_transform_dimensions($group['machine_value'], $dimensions);
 
-    image_style_transform_dimensions($group['machine_value'], $dimensions);
-    $srcset .= image_style_url($group['machine_value'],$image['path']).' '.$dimensions['width'].'w,';
+      $group['width'] = $dimensions['width'].'w';
+    }
+    $srcset .= image_style_url($group['machine_value'],$image['path']).' '.$group['width'].',';
   }
   $srcset = substr($srcset,0,-1);
 
