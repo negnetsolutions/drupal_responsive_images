@@ -75,7 +75,7 @@ function responsive_images_get_responsive_styles(){
 
   foreach(image_styles() as $key => $style){
 
-    if( preg_match("/(rs_[a-z-\\s]+)_?(min_)?([0-9pxw]+)?/u", $style['label'], $matches) !== 0) {
+    if( preg_match("/(rs_[0-9a-z-\\s]+)_?(min_)?([0-9pxw]+)?/u", $style['label'], $matches) !== 0) {
 
       $rstyle = array();
       $style_group = $matches[1];
