@@ -157,6 +157,11 @@ function responsive_images_image_render($image){
     $image['rs_group'] = $styles['groups'][$rs_group];
   }
 
+  $cachebuster = "";
+  if(isset($image['cachebuster'])){
+    $cachebuster = "&v=".$image['cachebuster'];
+  }
+
   drupal_add_js(drupal_get_path('module', 'responsive_images').'/responsive-image.min.js');
 
   $output = '<div class="responsive-image '.$image['style_name'].((isset($image['parent-classes'])) ? ' '.$image['parent-classes'] : '').'">'."\n";
@@ -174,11 +179,11 @@ function responsive_images_image_render($image){
 
       $group['width'] = $dimensions['width'].'w';
     }
-    $srcset .= image_style_url($group['machine_value'],$image['path']).' '.$group['width'].',';
+    $srcset .= image_style_url($group['machine_value'],$image['path']).$cachebuster.' '.$group['width'].',';
   }
   $srcset = substr($srcset,0,-1);
 
-  $output .= '<img srcset="'.$srcset.'" src="'.image_style_url($image['rs_group'][0]['machine_value'], $image['path']).'" alt="'.((isset($image['title'])) ? $image['title'] : '').'" '.((isset($image['classes'])) ? 'class="'.$image['classes'].'"' : '').' sizes="100vw" />'."\n";
+  $output .= '<img srcset="'.$srcset.'" src="'.image_style_url($image['rs_group'][0]['machine_value'], $image['path']).$cachebuster.'" alt="'.((isset($image['title'])) ? $image['title'] : '').'" '.((isset($image['classes'])) ? 'class="'.$image['classes'].'"' : '').' sizes="100vw" />'."\n";
 
   $output .= "</div>\n";
 
