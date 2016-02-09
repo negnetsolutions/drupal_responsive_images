@@ -178,7 +178,9 @@ function responsive_images_image_render($image){
   }
   $srcset = substr($srcset,0,-1);
 
-  $output .= '<img srcset="'.$srcset.'" src="'.image_style_url($image['rs_group'][0]['machine_value'], $image['path']).'" alt="'.((isset($image['title'])) ? $image['title'] : '').'" '.((isset($image['classes'])) ? 'class="'.$image['classes'].'"' : '').' />'."\n";
+  $sizes = (isset($image['sizes'])) ? $image['sizes'] : '100vw';
+
+  $output .= '<img srcset="'.$srcset.'" src="'.image_style_url($image['rs_group'][0]['machine_value'], $image['path']).'" alt="'.((isset($image['title'])) ? $image['title'] : '').'" '.((isset($image['classes'])) ? 'class="'.$image['classes'].'"' : '').' sizes="'.$sizes.'"/>'."\n";
 
   $output .= "</div>\n";
 
