@@ -75,7 +75,7 @@ function responsive_images_get_responsive_styles(){
 
   foreach(image_styles() as $key => $style){
 
-    if( preg_match("/(rs_[a-z-\\s]+)_?(min_)?([0-9pxw]+)?/u", $style['label'], $matches) !== 0) {
+    if( preg_match("/(rs_[0-9a-z-\\s]+)_?(min_)?([0-9pxw]+)?/u", $style['label'], $matches) !== 0) {
 
       $rstyle = array();
       $style_group = $matches[1];
@@ -157,6 +157,11 @@ function responsive_images_image_render($image){
     $image['rs_group'] = $styles['groups'][$rs_group];
   }
 
+  $cachebuster = "";
+  if(isset($image['cachebuster'])){
+    $cachebuster = "&v=".$image['cachebuster'];
+  }
+
   drupal_add_js(drupal_get_path('module', 'responsive_images').'/responsive-image.min.js');
 
   $output = '<div class="responsive-image '.$image['style_name'].((isset($image['parent-classes'])) ? ' '.$image['parent-classes'] : '').'">'."\n";
@@ -174,13 +179,13 @@ function responsive_images_image_render($image){
 
       $group['width'] = $dimensions['width'].'w';
     }
-    $srcset .= image_style_url($group['machine_value'],$image['path']).' '.$group['width'].',';
+    $srcset .= image_style_url($group['machine_value'],$image['path']).$cachebuster.' '.$group['width'].',';
   }
   $srcset = substr($srcset,0,-1);
 
   $sizes = (isset($image['sizes'])) ? $image['sizes'] : '100vw';
 
-  $output .= '<img srcset="'.$srcset.'" src="'.image_style_url($image['rs_group'][0]['machine_value'], $image['path']).'" alt="'.((isset($image['title'])) ? $image['title'] : '').'" '.((isset($image['classes'])) ? 'class="'.$image['classes'].'"' : '').' sizes="'.$sizes.'"/>'."\n";
+  $output .= '<img srcset="'.$srcset.'" src="'.image_style_url($image['rs_group'][0]['machine_value'], $image['path']).$cachebuster.'" alt="'.((isset($image['title'])) ? $image['title'] : '').'" '.((isset($image['classes'])) ? 'class="'.$image['classes'].'"' : '').' sizes="'.$sizes.'" />'."\n";
 
   $output .= "</div>\n";
 
