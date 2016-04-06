@@ -152,6 +152,11 @@ function responsive_images_add_js(){
 }
 function responsive_images_image_render($image){
 
+  //set path if not set
+  if(!isset($image['path']) && isset($image['uri'])){
+    $image['path'] = $image['uri'];
+  }
+
   if(!isset($image['rs_group'])){
     $styles = responsive_images_get_responsive_styles();
     $rs_group = responsive_images_get_responsive_group($styles, $image['style_name']);
