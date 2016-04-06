@@ -146,6 +146,10 @@ function responsive_images_image_style(&$variables) {
   $variables['path'] = image_style_url($variables['style_name'], $variables['path']);
   return theme('image', $variables);
 }
+function responsive_images_add_js(){
+  drupal_add_js(drupal_get_path('module', 'responsive_images').'/responsive-image.min.js');
+
+}
 function responsive_images_image_render($image){
 
   if(!isset($image['rs_group'])){
@@ -162,7 +166,7 @@ function responsive_images_image_render($image){
     $cachebuster = "&v=".$image['cachebuster'];
   }
 
-  drupal_add_js(drupal_get_path('module', 'responsive_images').'/responsive-image.min.js');
+  responsive_images_add_js();
 
   $output = '<div class="responsive-image '.$image['style_name'].((isset($image['parent-classes'])) ? ' '.$image['parent-classes'] : '').'">'."\n";
 
