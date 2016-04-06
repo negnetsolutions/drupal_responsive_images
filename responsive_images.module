@@ -152,6 +152,11 @@ function responsive_images_add_js(){
 }
 function responsive_images_image_render($image){
 
+  //set use relative path if not set
+  if(!isset($image['use_relative_path'])){
+    $image['use_relative_path'] = true;
+  }
+
   //set path if not set
   if(!isset($image['path']) && isset($image['uri'])){
     $image['path'] = $image['uri'];
@@ -198,7 +203,9 @@ function responsive_images_image_render($image){
 
   $output .= "</div>\n";
 
-  $output = str_replace($GLOBALS['base_url'],'',$output);
+  if( $image['use_relative_path'] == true ){
+    $output = str_replace($GLOBALS['base_url'],'',$output);
+  }
 
   return $output;
 }
