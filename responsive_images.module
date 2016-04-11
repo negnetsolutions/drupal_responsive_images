@@ -134,6 +134,7 @@ function responsive_images_image_style(&$variables) {
 
   if( ($rs_group = responsive_images_get_responsive_group($styles, $variables['style_name']) ) !== false ){
     $variables['rs_group'] = $styles['groups'][$rs_group];
+    drupal_add_css(drupal_get_path('module', 'responsive_images').'/css/responsive_images.css');
     return responsive_images_image_render($variables);
   }
 
@@ -142,6 +143,11 @@ function responsive_images_image_style(&$variables) {
     'width' => $variables['width'],
     'height' => $variables['height'],
   );
+  image_style_transform_dimensions($variables['style_name'], $dimensions);
+
+  $variables['width'] = $dimensions['width'];
+  $variables['height'] = $dimensions['height'];
+
   // Determine the URL for the styled image.
   $variables['path'] = image_style_url($variables['style_name'], $variables['path']);
   return theme('image', $variables);

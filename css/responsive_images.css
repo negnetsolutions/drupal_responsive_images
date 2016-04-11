@@ -1,0 +1,4 @@
+/* line 1, ../sass/responsive_images.scss */
+.responsive-image img {
+  max-width: 100%;
+  height: auto; }
