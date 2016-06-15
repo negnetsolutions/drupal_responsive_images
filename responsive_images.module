@@ -152,15 +152,26 @@ function responsive_images_image_style(&$variables) {
   $variables['path'] = image_style_url($variables['style_name'], $variables['path']);
   return theme('image', $variables);
 }
-function responsive_images_add_js(){
-  drupal_add_js(drupal_get_path('module', 'responsive_images').'/responsive-image.min.js');
 
+function responsive_images_js_alter(&$javascript){
+  $javascript[drupal_get_path('module', 'responsive_images').'/lazysizes.min.js']['async'] = true;
+  $javascript[drupal_get_path('module', 'responsive_images').'/respimage.min.js']['async'] = true;
+}
+function responsive_images_add_js(){
+  drupal_add_js(drupal_get_path('module', 'responsive_images').'/rspolly.js');
+  drupal_add_js(drupal_get_path('module', 'responsive_images').'/lazysizes.min.js');
+  drupal_add_js(drupal_get_path('module', 'responsive_images').'/respimage.min.js');
 }
 function responsive_images_image_render($image){
 
   //set use relative path if not set
   if(!isset($image['use_relative_path'])){
     $image['use_relative_path'] = true;
+  }
+
+  //set lazyload if not already set
+  if(!isset($image['lazyload'])){
+    $image['lazyload'] = true;
   }
 
   //set path if not set
@@ -203,9 +214,19 @@ function responsive_images_image_render($image){
   }
   $srcset = substr($srcset,0,-1);
 
+  if($image['lazyload'] == true){
+    $image['classes'] .= ' lazyload';
+    if(!isset($image['sizes'])){
+      $image['sizes'] = 'auto';
+    }
+  }
+
   $sizes = (isset($image['sizes'])) ? $image['sizes'] : '100vw';
 
-  $output .= '<img srcset="'.$srcset.'" src="'.image_style_url($image['rs_group'][0]['machine_value'], $image['path']).$cachebuster.'" alt="'.((isset($image['title'])) ? $image['title'] : '').'" '.((isset($image['classes'])) ? 'class="'.$image['classes'].'"' : '').' sizes="'.$sizes.'" />'."\n";
+  $srcv = ($image['lazyload'] == true) ? 'data-src' : 'src';
+  $srcsetv = ($image['lazyload'] == true) ? 'data-srcset' : 'srcset';
+
+  $output .= '<img '.(($image['lazyload'] == true) ? 'srcset="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" ' : '').$srcsetv.'="'.$srcset.'" '.$srcv.'="'.image_style_url($image['rs_group'][0]['machine_value'], $image['path']).$cachebuster.'" alt="'.((isset($image['title'])) ? $image['title'] : '').'" '.((isset($image['classes'])) ? 'class="'.$image['classes'].'"' : '').' sizes="'.$sizes.'" />'."\n";
 
   $output .= "</div>\n";
 
