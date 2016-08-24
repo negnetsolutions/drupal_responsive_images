@@ -162,6 +162,68 @@ function responsive_images_add_js(){
   drupal_add_js(drupal_get_path('module', 'responsive_images').'/lazysizes.min.js');
   drupal_add_js(drupal_get_path('module', 'responsive_images').'/respimage.min.js');
 }
+
+function responsive_images_image_render_bg($image){
+
+  if(!isset($image['rs_group'])){
+    $styles = responsive_images_get_responsive_styles();
+    $rs_group = responsive_images_get_responsive_group($styles, $image['style_name']);
+    if($rs_group === false){
+      return 'Could not find responsive group style. Error.';
+    }
+    $image['rs_group'] = $styles['groups'][$rs_group];
+  }
+
+  $output = '<figure class="first responsive-image-bg '.$image['class'].'"></figure>'."\n";
+
+
+  return $output;
+}
+function responsive_images_image_group_render_bg($images){
+  $output = "<div class='images'>\n";
+
+  for($i=0; $i< count($images); $i++){
+    $images[$i]['class'] = uniqid('rsbg');
+    $output .= responsive_images_image_render_bg($images[$i]);
+  }
+
+  $output .= "</div>\n";
+
+  $output .= "<style>\n";
+  for($i=0; $i < count($images); $i++){
+    $output .= responsive_images_image_render_style($images[$i]);
+  }
+
+  $output .= "</style>\n";
+
+  $output = str_replace($GLOBALS['base_url'],'',$output);
+  return $output;
+}
+function responsive_images_image_render_style($image){
+  if(!isset($image['rs_group'])){
+    $styles = responsive_images_get_responsive_styles();
+    $rs_group = responsive_images_get_responsive_group($styles, $image['style_name']);
+    if($rs_group === false){
+      return 'Could not find responsive group style. Error.';
+    }
+    $image['rs_group'] = $styles['groups'][$rs_group];
+  }
+
+  $output = "";
+
+  $sort = array();
+  foreach($image['rs_group'] as $group){
+    $sort[] = $group['float'];
+  }
+  array_multisort( $sort, SORT_ASC, $image['rs_group'] );
+
+  foreach($image['rs_group'] as $group){
+    $output .= "\t@media only screen and (min-width: ".$group['float']."px){ .".$image['class']." { background-image: url(".image_style_url($group['machine_value'],$image['path'])."); }}\n";
+  }
+
+  return $output;
+}
+
 function responsive_images_image_render($image){
 
   //set use relative path if not set
