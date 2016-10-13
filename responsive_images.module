@@ -34,8 +34,44 @@ function _responsive_images_filter_settings($form, &$form_state, $filter, $forma
 function _responsive_images_filter_process($text, $filter, $format, $langcode, $cache, $cache_id) {
 
   $uri = 'public://';
-  $public_path= str_replace($GLOBALS['base_url'], '', file_create_url($uri));
 
+  //find images in public folder and overwrite
+  if( preg_match_all('/<img[\\w\\W]+?src="\/sites\/default\/files\/styles\/[\\w]+\/public\/([\\w?=\\.]+)"[\\w\\W]+?\/>/u', $text, $matches_code) ){
+
+    foreach($matches_code[0] as $ci => $code){
+
+      //get image filename
+      $img = $matches_code[1][$ci];
+
+      //remove any parameters
+      $img = strstr($img, '?', true);
+
+      $uri = "public://".$img;
+
+      $classes = null;
+      if( preg_match('/class="([\\w\\s]*)"/u', $code, $matches) ){
+        $classes = $matches[1];
+      }
+      $title = null;
+      if( preg_match('/alt="([\\w\\s]*)"/u', $code, $matches) ){
+        $title = $matches[1];
+      }
+
+      $image = array(
+        'uri' => $uri,
+        'path' => $uri,
+        'style_name' => $filter->settings['responsive_image_filter_image-style'],
+        'classes' => $classes,
+        'title' => $title,
+      );
+
+      $replacement = responsive_images_image_render($image);
+      $text = str_replace($code, $replacement, $text);
+    }
+
+  }
+
+  //find old image insert items
   if (preg_match_all("/\\[image:\\s*([^,]+)(,(.+))?\\]/isU", $text, $matches_code)) {
 
     foreach($matches_code[0] as $ci => $code){
