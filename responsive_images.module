@@ -189,14 +189,10 @@ function responsive_images_image_style(&$variables) {
   return theme('image', $variables);
 }
 
-function responsive_images_js_alter(&$javascript){
-  $javascript[drupal_get_path('module', 'responsive_images').'/lazysizes.min.js']['async'] = true;
-  $javascript[drupal_get_path('module', 'responsive_images').'/respimage.min.js']['async'] = true;
-}
 function responsive_images_add_js(){
   drupal_add_js(drupal_get_path('module', 'responsive_images').'/rspolly.js');
-  drupal_add_js(drupal_get_path('module', 'responsive_images').'/lazysizes.min.js');
-  drupal_add_js(drupal_get_path('module', 'responsive_images').'/respimage.min.js');
+  drupal_add_js(drupal_get_path('module', 'responsive_images').'/lazysizes.min.js',array('async' => true));
+  drupal_add_js(drupal_get_path('module', 'responsive_images').'/respimage.min.js',array('async' => true));
 }
 
 function responsive_images_image_render_bg($image){
