@@ -195,28 +195,33 @@ function responsive_images_add_js(){
   drupal_add_js(drupal_get_path('module', 'responsive_images').'/respimage.min.js',array('async' => true));
 }
 
-function responsive_images_image_render_bg($image){
+function responsive_images_image_render_bg($image, $single=true){
 
-  if(!isset($image['rs_group'])){
-    $styles = responsive_images_get_responsive_styles();
-    $rs_group = responsive_images_get_responsive_group($styles, $image['style_name']);
-    if($rs_group === false){
-      return 'Could not find responsive group style. Error.';
-    }
-    $image['rs_group'] = $styles['groups'][$rs_group];
+  if($single == true){
+    $image['class'] = uniqid('rsbg');
   }
 
-  $output = '<figure class="first responsive-image-bg '.$image['class'].'"></figure>'."\n";
+  $output = '<figure class="first responsive-image-bg responsive-image '.$image['style_name'].$image['classes'].' '.$image['class'].'"></figure>'."\n";
 
+  if($single == true){
+    $output .= "<style>\n";
+    $output .= responsive_images_image_render_style($image);
+    $output .= "</style>\n";
+
+    if( $image['use_relative_path'] == true ){
+      $output = str_replace($GLOBALS['base_url'],'',$output);
+    }
+
+  }
 
   return $output;
 }
 function responsive_images_image_group_render_bg($images){
-  $output = "<div class='images'>\n";
+  $output = "<div class='responsive-background images'>\n";
 
   for($i=0; $i< count($images); $i++){
-    $images[$i]['class'] = uniqid('rsbg');
-    $output .= responsive_images_image_render_bg($images[$i]);
+    $images[$i]['class'] .= ' '.uniqid('rsbg');
+    $output .= responsive_images_image_render_bg($images[$i], false);
   }
 
   $output .= "</div>\n";
@@ -241,16 +246,19 @@ function responsive_images_image_render_style($image){
     $image['rs_group'] = $styles['groups'][$rs_group];
   }
 
+
   $output = "";
 
   $sort = array();
   foreach($image['rs_group'] as $group){
     $sort[] = $group['float'];
   }
+
   array_multisort( $sort, SORT_ASC, $image['rs_group'] );
 
   foreach($image['rs_group'] as $group){
-    $output .= "\t@media only screen and (min-width: ".$group['float']."px){ .".$image['class']." { background-image: url(".image_style_url($group['machine_value'],$image['path'])."); }}\n";
+    $output .= "\t@media only screen and (min-width: ".($group['float']/2)."px){ .".$image['class']." { background-image: url(".image_style_url($group['machine_value'],$image['path'])."); }}\n";
+    $output .= "\t@media only screen and (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) and (min-width: ".($group['float'] / 4)."px){ .".$image['class']." { background-image: url(".image_style_url($group['machine_value'],$image['path'])."); }}\n";
   }
 
   return $output;
@@ -278,6 +286,17 @@ function responsive_images_image_render($image){
     $image['path'] = $image['uri'];
   }
 
+  $cachebuster = "";
+  if(isset($image['cachebuster'])){
+    $cachebuster = "&v=".$image['cachebuster'];
+  }
+
+
+  if(isset($image['render_as_bg'])){
+    return responsive_images_image_render_bg($image);
+  }
+
+
   if(!isset($image['rs_group'])){
     $styles = responsive_images_get_responsive_styles();
     $rs_group = responsive_images_get_responsive_group($styles, $image['style_name']);
@@ -285,11 +304,6 @@ function responsive_images_image_render($image){
       return 'Could not find responsive group style. Error.';
     }
     $image['rs_group'] = $styles['groups'][$rs_group];
-  }
-
-  $cachebuster = "";
-  if(isset($image['cachebuster'])){
-    $cachebuster = "&v=".$image['cachebuster'];
   }
 
   responsive_images_add_js();
