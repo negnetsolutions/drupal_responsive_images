@@ -1,5 +1,9 @@
 <?php
 
+function responsive_images_preprocess_html(&$variables) {
+  responsive_images_add_js();
+}
+
 function responsive_images_filter_info() {
   $filters = array();
   $filters['responsive_image_filter'] = array(
@@ -305,8 +309,6 @@ function responsive_images_image_render($image){
     }
     $image['rs_group'] = $styles['groups'][$rs_group];
   }
-
-  responsive_images_add_js();
 
   $output = '<div class="responsive-image '.$image['style_name'].((isset($image['parent-classes'])) ? ' '.$image['parent-classes'] : '').'">'."\n";
 
