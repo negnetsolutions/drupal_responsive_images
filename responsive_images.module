@@ -36,7 +36,7 @@ function _responsive_images_filter_process($text, $filter, $format, $langcode, $
   $uri = 'public://';
 
   //find images in public folder and overwrite
-  if( preg_match_all('/<img[\\w\\W]+?src="\/sites\/default\/files\/styles\/[\\w]+\/public\/([\\w?=\\.]+)"[\\w\\W]+?\/>/u', $text, $matches_code) ){
+  if( preg_match_all('/<img[\\w\\W]+?src="\/sites\/default\/files\/styles\/[\\w]+\/public\/([\\w\\s?=\\.]+)"[\\w\\W]+?\/>/u', $text, $matches_code) ){
 
     foreach($matches_code[0] as $ci => $code){
 
