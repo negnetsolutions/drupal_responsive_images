@@ -53,11 +53,11 @@ function _responsive_images_filter_process($text, $filter, $format, $langcode, $
       $uri = "public://".$img;
 
       $classes = null;
-      if( preg_match('/class="([\\w\\s]*)"/u', $code, $matches) ){
+      if( preg_match('/class="([-_\\w\\s]*)"/u', $code, $matches) ){
         $classes = $matches[1];
       }
       $title = null;
-      if( preg_match('/alt="([\\w\\s]*)"/u', $code, $matches) ){
+      if( preg_match('/alt="([_-\\w\\s]*)"/u', $code, $matches) ){
         $title = $matches[1];
       }
 
