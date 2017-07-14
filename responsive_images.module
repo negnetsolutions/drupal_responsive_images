@@ -216,7 +216,9 @@ function responsive_images_image_render_bg($image, $single=true){
     $image['class'] = uniqid('rsbg');
   }
 
-  $output = '<figure class="first responsive-image-bg responsive-image '.$image['style_name'].$image['classes'].' '.$image['class'].'"></figure>'."\n";
+  $image['style'] = (isset($image['style'])) ? $image['style'] : '';
+
+  $output = '<figure class="first responsive-image-bg responsive-image '.$image['style_name'].$image['classes'].' '.$image['class'].'"'.$image['style'].'></figure>'."\n";
 
   if($single == true){
     $output .= "<style>\n";
@@ -309,7 +311,7 @@ function responsive_images_image_render($image){
   }
 
 
-  if(isset($image['render_as_bg'])){
+  if(isset($image['render_as_bg']) && $image['render_as_bg'] == true){
     return responsive_images_image_render_bg($image);
   }
 
