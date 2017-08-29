@@ -205,9 +205,13 @@ function responsive_images_image_style(&$variables) {
 }
 
 function responsive_images_add_js(){
+  //add img tag scripts
   drupal_add_js(drupal_get_path('module', 'responsive_images').'/rspolly.js');
   drupal_add_js(drupal_get_path('module', 'responsive_images').'/lazysizes.min.js',array('async' => true));
   drupal_add_js(drupal_get_path('module', 'responsive_images').'/respimage.min.js',array('async' => true));
+  //add background scripts
+  drupal_add_js(drupal_get_path('module', 'responsive_images').'/intersection-observer.js',array('async' => true));
+  drupal_add_js(drupal_get_path('module', 'responsive_images').'/lazybg.js',array('async' => true));
 }
 
 function responsive_images_image_render_bg($image, $single=true){
@@ -216,13 +220,19 @@ function responsive_images_image_render_bg($image, $single=true){
     $image['class'] = uniqid('rsbg');
   }
 
+  //set lazyload if not already set
+  if(!isset($image['lazyload'])){
+    $image['lazyload'] = true;
+  }
+
   $image['style'] = (isset($image['style'])) ? $image['style'] : '';
+  $image['classes'] .= ($image['lazyload'] == true) ? ' lazybg' : '';
 
   $output = '<figure class="first responsive-image-bg responsive-image '.$image['style_name'].$image['classes'].' '.$image['class'].'"'.$image['style'].'></figure>'."\n";
 
   if($single == true){
     $output .= "<style>\n";
-    $output .= responsive_images_image_render_style($image);
+    $output .= responsive_images_image_render_style($image, $image['lazyload']);
     $output .= "</style>\n";
 
     if( $image['use_relative_path'] == true ){
@@ -253,7 +263,7 @@ function responsive_images_image_group_render_bg($images){
   $output = str_replace($GLOBALS['base_url'],'',$output);
   return $output;
 }
-function responsive_images_image_render_style($image){
+function responsive_images_image_render_style($image, $lazyload=false){
   if(!isset($image['rs_group'])){
     $styles = responsive_images_get_responsive_styles();
     $rs_group = responsive_images_get_responsive_group($styles, $image['style_name']);
@@ -272,6 +282,10 @@ function responsive_images_image_render_style($image){
   }
 
   array_multisort( $sort, SORT_ASC, $image['rs_group'] );
+
+  if($lazyload == true){
+    $image['class'] .= '.visible';
+  }
 
   foreach($image['rs_group'] as $group){
     $output .= "\t@media only screen and (min-width: ".($group['float']/1)."px){ .".$image['class']." { background-image: url(".image_style_url($group['machine_value'],$image['path'])."); }}\n";
