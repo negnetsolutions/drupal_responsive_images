@@ -230,6 +230,10 @@ function responsive_images_image_render_bg($image, $single=true){
     $image['lazyload'] = true;
   }
 
+  if(!isset($image['classes'])){
+    $image['classes'] = '';
+  }
+
   $image['style'] = (isset($image['style'])) ? $image['style'] : '';
   $image['classes'] .= ($image['lazyload'] == true) ? ' lazybg' : '';
 
@@ -324,11 +328,6 @@ function responsive_images_image_render($image){
     $image['path'] = $image['uri'];
   }
 
-  $cachebuster = "";
-  if(isset($image['cachebuster'])){
-    $cachebuster = "&v=".$image['cachebuster'];
-  }
-
   if($image['filemime'] == 'image/svg+xml'){
     return responsive_images_image_render_svg($image);
   }
@@ -338,6 +337,47 @@ function responsive_images_image_render($image){
   }
 
 
+  $output = '<div class="responsive-image '.$image['style_name'].((isset($image['parent-classes'])) ? ' '.$image['parent-classes'] : '').'"'.$image['style'].'>'."\n";
+
+  $output .= responsive_image_render_img($image)."\n";
+
+  $output .= "</div>\n";
+
+  if( $image['use_relative_path'] == true ){
+    $output = str_replace($GLOBALS['base_url'],'',$output);
+  }
+
+  return $output;
+}
+
+function responsive_image_render_img($image){
+
+  //set use relative path if not set
+  if(!isset($image['use_relative_path'])){
+    $image['use_relative_path'] = true;
+  }
+
+  if(!isset($image['classes'])){
+    $image['classes'] = '';
+  }
+
+  $image['style'] = (isset($image['style'])) ? ' style="'.$image['style'].'"' : '';
+
+  //set lazyload if not already set
+  if(!isset($image['lazyload'])){
+    $image['lazyload'] = true;
+  }
+
+  //set path if not set
+  if(!isset($image['path']) && isset($image['uri'])){
+    $image['path'] = $image['uri'];
+  }
+
+  $cachebuster = "";
+  if(isset($image['cachebuster'])){
+    $cachebuster = "&v=".$image['cachebuster'];
+  }
+
   if(!isset($image['rs_group'])){
     $styles = responsive_images_get_responsive_styles();
     $rs_group = responsive_images_get_responsive_group($styles, $image['style_name']);
@@ -346,8 +386,6 @@ function responsive_images_image_render($image){
     }
     $image['rs_group'] = $styles['groups'][$rs_group];
   }
-
-  $output = '<div class="responsive-image '.$image['style_name'].((isset($image['parent-classes'])) ? ' '.$image['parent-classes'] : '').'"'.$image['style'].'>'."\n";
 
   $srcset="";
   foreach($image['rs_group'] as $group){
@@ -378,13 +416,15 @@ function responsive_images_image_render($image){
   $srcv = ($image['lazyload'] == true) ? 'data-src' : 'src';
   $srcsetv = ($image['lazyload'] == true) ? 'data-srcset' : 'srcset';
 
-  $output .= '<img '.(($image['lazyload'] == true) ? 'srcset="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" ' : '').$srcsetv.'="'.$srcset.'" '.$srcv.'="'.image_style_url($image['rs_group'][0]['machine_value'], $image['path']).$cachebuster.'" alt="'.((isset($image['title'])) ? $image['title'] : '').'" '.((isset($image['classes'])) ? 'class="'.$image['classes'].'"' : '').' sizes="'.$sizes.'" />'."\n";
-
-  $output .= "</div>\n";
-
-  if( $image['use_relative_path'] == true ){
-    $output = str_replace($GLOBALS['base_url'],'',$output);
+  if(!isset($image['src_style'])){
+    $image['src_style'] = $image['rs_group'][0]['machine_value'];
   }
 
-  return $output;
+  $src = image_style_url($image['src_style'], $image['path']).$cachebuster;
+
+  $attributes = (isset($image['attributes'])) ? ' '.$image['attributes'].' ' : '';
+
+  return '<img '.(($image['lazyload'] == true) ? 'srcset="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" ' : '').$srcsetv.'="'.$srcset.'" '.$srcv.'="'.$src.'" alt="'.((isset($image['title'])) ? $image['title'] : '').'" '.((isset($image['classes'])) ? 'class="'.$image['classes'].'"' : '').' sizes="'.$sizes.'"'.$attributes.' />';
+
+
 }
