@@ -299,14 +299,7 @@ function responsive_images_image_render_style($image, $lazyload=false){
   foreach($image['rs_group'] as $i => $group){
     $output .= "\t@media only screen and (min-width: ".($group['float']/1)."px){ .".$image['class']." { background-image: url(".image_style_url($group['machine_value'],$image['path'])."); }}\n";
 
-    //try for the next size if possible
-    if(( $hi_res = responsive_images_findGroup($group['float']*2,$image['rs_group']) )){
-    }
-    else {
-      $hi_res = $group;
-    }
-
-    $output .= "\t@media only screen and (-webkit-min-device-pixel-ratio: 2) and (min-resolution: 192dpi) and (min-width: ".($group['float'] / 2)."px){ .".$image['class']." { background-image: url(".image_style_url($hi_res['machine_value'],$image['path'])."); }}\n";
+    $output .= "\t@media only screen and (-webkit-min-device-pixel-ratio: 2) and (min-resolution: 192dpi) and (min-width: ".($group['float'] / 2)."px){ .".$image['class']." { background-image: url(".image_style_url($group['machine_value'],$image['path'])."); }}\n";
   }
 
   return $output;
