@@ -338,7 +338,7 @@ function responsive_images_image_render($image){
     $image['path'] = $image['uri'];
   }
 
-  if($image['filemime'] == 'image/svg+xml'){
+  if(isset($image['filemime']) && $image['filemime'] == 'image/svg+xml'){
     return responsive_images_image_render_svg($image);
   }
 
