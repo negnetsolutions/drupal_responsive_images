@@ -314,6 +314,65 @@ function responsive_images_findGroup($min_size,$groups){
   return false;
 }
 
+/*
+ * $image_array item =>
+ * ['query'=>'(min-width: 36em)','type' => 'source/img', 'img' => '<img src="" />']
+ * returns <picture> element
+ */
+function responsive_images_picture_render($image_array) {
+
+  $el = 'picture';
+  $class = 'rs_picture';
+
+  //check to see if any of the images are set to render as a background
+  foreach ($image_array as $source) {
+    if ( isset($source['img']['render_as_bg']) && $source['img']['render_as_bg'] == true ) {
+      $el = 'div';
+      break;
+    }
+  }
+
+  foreach ($image_array as $source) {
+    if ($el == 'div') {
+      $output .= _responsive_images_render_picture_bg($source)."\n";
+    } else {
+      $output .= _responsive_images_render_picture_source($source)."\n";
+    }
+  }
+
+  return "<$el class='$class'>\n$output</$el>";
+}
+
+function _responsive_images_render_picture_bg($source) {
+  $type = (isset($source['type'])) ? $source['type'] : 'source';
+
+  if ($type == 'img') {
+    return '';
+  }
+
+  $id = uniqid('rspicture');
+
+  $style = '';
+  if(isset($source['query'])) {
+    $style = "<style>.$id { display: none; } @media ".$source['query']." { .$id { display: block; } }</style>\n";
+  }
+
+  return "$style<div class='$id rs_picture_source'>\n".responsive_images_image_render_bg($source['img'])."\n</div>";
+}
+
+function _responsive_images_render_picture_source($source) {
+  //set defaults
+  $type = (isset($source['type'])) ? $source['type'] : 'source';
+
+  $media = (isset($source['query'])) ? ' media="'.$source['query'].'"' : '';
+
+  $img = responsive_image_render_img($source['img']);
+
+  $img = str_replace('<img','<'.$type.$media,$img);
+
+  return $img;
+}
+
 function responsive_images_image_render($image){
 
   //set use relative path if not set
