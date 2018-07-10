@@ -244,7 +244,7 @@ function responsive_images_image_render_bg($image, $single=true){
     $output .= responsive_images_image_render_style($image, $image['lazyload']);
     $output .= "</style>\n";
 
-    if( $image['use_relative_path'] == true ){
+    if( isset($image['use_relative_path']) && $image['use_relative_path'] == true ){
       $output = str_replace($GLOBALS['base_url'],'',$output);
     }
 
@@ -332,6 +332,7 @@ function responsive_images_picture_render($image_array) {
     }
   }
 
+  $output = '';
   foreach ($image_array as $source) {
     if ($el == 'div') {
       $output .= _responsive_images_render_picture_bg($source)."\n";
